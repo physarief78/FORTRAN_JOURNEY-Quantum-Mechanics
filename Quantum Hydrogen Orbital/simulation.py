@@ -29,35 +29,6 @@ colorbar = plt.colorbar(contour, ax=ax, label="Wavefunction Amplitude (ψ)")
 # Add a title to update separately
 title = ax.set_title("")
 
-# Update function for animation
-def update(frame):
-    global contour
-    for c in contour.collections:
-        c.remove()  # Clear previous contours
-
-    # Load data for the current frame
-    x, y, z = load_orbital_data(data_files[frame])
-    contour = ax.contourf(X, Y, z, levels=50, cmap="seismic_r") 
-    
-    # Extract quantum numbers from filename
-    filename = data_files[frame]
-    # Filename format: orbital_data_4_<l>_<m>_normalized.dat
-    parts = filename.split("_")  # Split filename on '_'
-    l = int(parts[3])  # Extract l (corrected index)
-    m = int(parts[4])  # Extract m (corrected index)
-
-    # Update title dynamically
-    title.set_text(f"Hydrogen Quantum State of n=4, l={l}, m={m}")
-    return contour.collections + [title]
-
-# Create animation
-ani = FuncAnimation(fig, update, frames=len(data_files), blit=False, interval=1000)
-
-# Display or save animation
-ani.save("hydrogen_orbital_animation.gif")  # Uncomment to save animation
-
-plt.show()
-
 # Update function for animation and saving
 def save_frame(frame):
     global contour
@@ -88,3 +59,32 @@ for frame in range(len(data_files)):
     save_frame(frame)
 
 print(f"All frames saved in '{output_dir}' directory.")
+
+# Update function for animation
+def update(frame):
+    global contour
+    for c in contour.collections:
+        c.remove()  # Clear previous contours
+
+    # Load data for the current frame
+    x, y, z = load_orbital_data(data_files[frame])
+    contour = ax.contourf(X, Y, z, levels=50, cmap="seismic_r") 
+    
+    # Extract quantum numbers from filename
+    filename = data_files[frame]
+    # Filename format: orbital_data_4_<l>_<m>_normalized.dat
+    parts = filename.split("_")  # Split filename on '_'
+    l = int(parts[3])  # Extract l (corrected index)
+    m = int(parts[4])  # Extract m (corrected index)
+
+    # Update title dynamically
+    title.set_text(f"Hydrogen Quantum State of n=4, l={l}, m={m}")
+    return contour.collections + [title]
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=len(data_files), blit=False, interval=1000)
+
+# Display or save animation
+ani.save("hydrogen_orbital_animation.gif")  # Uncomment to save animation
+
+plt.show()
