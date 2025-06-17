@@ -3,46 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 # ─── Physical Constants (SI) ────────────────────────────────────────────────
-hbar = 1.054571817e-34       # J·s
-m_e  = 9.10938356e-31        # kg (electron mass)
-# ─── Simulation Parameters ──────────────────────────────────────────────────
-nx = 00                     # number of spatial points
-L  = 1.0e-6                  # box length in meters (1 μm)
-dx = L / nx                  # spatial step (m)
-dt = 1.0e-18                 # time step (s)
-tl = 2000                    # total number of time steps
-
-# Derived grid
-x = np.linspace(-L/2, L/2 - dx, nx)
-
-# ─── Initial Gaussian Wavepacket ───────────────────────────────────────────
-x0    = -L/4                 # initial center (m)
-sigma = 1.0e-7               # width (m)
-p0    = 1.0e-14              # initial momentum (kg·m/s)
-k0    = p0 / hbar            # wave number (1/m)
-
-# Construct initial psi
-psi = np.exp(-0.5*((x - x0)/sigma)**2) * np.exp(1j*k0*x)
-# Normalize
-norm = np.sqrt(np.sum(np.abs(psi)**2) * dx)
-psi /= norm
-
-# ─── Crank–Nicolson Coefficients ───────────────────────────────────────────
-alpha = 1j * hbar * dt / (2.0 * m_e * dx**2)
-
-# A tri‐diagonal (1 + 2α on diag, −α on off‐diag)
-a_main = np.full(nx, 1.0 + 2.0*alpha, dtype=complex)
-a_off  = np.full(nx-1, -alpha,      dtype=complex)
-
-# B tri‐diagonal (1 − 2α on diag, +α on off‐diag)
-b_main = np.full(nx, 1.0 - 2.0*alpha, dtype=complex)
-b_off  = np.full(nx-1,  alpha,       dtype=complex)
-
-# Hard‐wall boundaries: only cut the very first/last linkimport numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-
-# ─── Physical Constants (SI) ────────────────────────────────────────────────
 hbar = 1.054571817e-34      # J·s
 m_e  = 9.10938356e-31       # kg
 
