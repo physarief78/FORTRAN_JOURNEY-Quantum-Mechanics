@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 hbar = 1.054571817e-34       # J·s
 m_e  = 9.10938356e-31        # kg (electron mass)
 # ─── Simulation Parameters ──────────────────────────────────────────────────
-nx = 200                     # number of spatial points
+nx = 00                     # number of spatial points
 L  = 1.0e-6                  # box length in meters (1 μm)
 dx = L / nx                  # spatial step (m)
 dt = 1.0e-18                 # time step (s)
@@ -157,66 +157,4 @@ ani = FuncAnimation(
 #ani.save('wavepacket_SI_fixed.gif', writer='pillow', fps=30)
 plt.show()
 
-print('Saved: wavepacket_SI_fixed.gif')
-
-for arr in (a_main, b_main):
-    arr[0] = arr[-1] = 1.0
-for arr in (a_off, b_off):
-    arr[0] = arr[-1] = 0.0
-
-def thomas_solve(a_diag, a_off, rhs):
-    """Thomas algorithm for A x = rhs."""
-    n = len(a_diag)
-    diag = a_diag.copy()
-    off  = a_off.copy()
-    b    = rhs.copy()
-    # forward elimination
-    for i in range(1, n):
-        w = off[i-1] / diag[i-1]
-        diag[i] -= w * off[i-1]
-        b[i]    -= w * b[i-1]
-    # back substitution
-    x_new = np.zeros(n, dtype=complex)
-    x_new[-1] = b[-1] / diag[-1]
-    for i in range(n-2, -1, -1):
-        x_new[i] = (b[i] - off[i] * x_new[i+1]) / diag[i]
-    return x_new
-
-# ─── Time–Evolution Storage ────────────────────────────────────────────────
-psi_history = np.zeros((tl, nx), dtype=complex)
-
-for t in range(tl):
-    # Build RHS = B * psi
-    rhs = np.zeros(nx, dtype=complex)
-    rhs[1:-1] = (
-        b_off[:-1] * psi[:-2] +
-        b_main[1:-1] * psi[1:-1] +
-        b_off[1:]   * psi[2:]
-    )
-    rhs[0], rhs[-1] = psi[0], psi[-1]
-    # Solve A ψ_new = RHS
-    psi = thomas_solve(a_main, a_off, rhs)
-    psi_history[t] = psi
-
-# ─── Animation (Density + Re & Im Parts) ──────────────────────────────────
-fig, ax = plt.subplots()
-line_d, = ax.plot(x*1e6, np.abs(psi_history[0])**2, lw=2, label=r'$|\psi|^2$')
-line_r, = ax.plot(x*1e6, psi_history[0].real,   ls='--', label='Re[$\\psi$]')
-line_i, = ax.plot(x*1e6, psi_history[0].imag,   ls=':',  label='Im[$\\psi$]')
-ax.set_xlim((x.min()*1e6, x.max()*1e6))
-ax.set_xlabel('x (μm)')
-ax.legend()
-ax.set_title('Electron Wavepacket in 1 μm Box')
-
-def update(frame):
-    ψ = psi_history[frame]
-    line_d.set_ydata(np.abs(ψ)**2)
-    line_r.set_ydata(ψ.real)
-    line_i.set_ydata(ψ.imag)
-    return line_d, line_r, line_i
-
-ani = FuncAnimation(fig, update, frames=tl, interval=20, blit=True)
-#ani.save('wavepacket_SI.gif', writer='pillow', fps=30)
-plt.show()
-
-print('Saved SI‐unit animation as wavepacket_SI.gif')
+print('Saved: wavepacket_SI.gif')
